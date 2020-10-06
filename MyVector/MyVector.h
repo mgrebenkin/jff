@@ -22,20 +22,34 @@ public:
     m_capacity(0){
     }
     MyVector(std::size_t count):
-    m_data(nullptr), m_size(0), m_blocks_amount(0){
-        m_capacity = count;
-        allocate(m_capacity/_BLOCK_SIZE + m_capacity%_BLOCK_SIZE?1:0);
-
+    m_data(nullptr), m_size(0), m_capacity(0), m_blocks_amount(0){
+        allocate(blocks_in_size(count));
+    }
+    
+    MyVector(const MyVector& other):
+    m_data(nullptr), m_size(other.m_size), m_blocks_amount(0), m_capacity(0){
+        allocate(other.m_blocks_amount);
+        for(size_t i = 0; i < other.size(); i++){
+            m_data[i] = other.m_data[i];
+        }
+    }
+    
+    MyVector(MyVector&& other):
+    m_data(other.m_data), m_blocks_amount(other.m_blocks_amount), m_capacity(other.m_capacity){
+        other.m_data = nullptr;
+        other.m_blocks_amount = 0;
+        other.m_capacity = 0;
+        other.m_size = 0;
+    }
+    ~MyVector(){
+        Clear();
+        delete[] m_data;
     }
     void Clear(){
         for (int i = 0; i< m_size; i++){
             m_data[i].~T();
         }
         m_size = 0;
-    }
-    ~MyVector(){
-        Clear();
-        delete[] m_data;
     }
     T& operator[](std::size_t pos){
         return m_data[pos];
@@ -65,6 +79,14 @@ public:
         m_size++;
         DBMSG("Move pushed");
     }
+    
+    template<typename... Args>
+    T& EmplaceBack(Args&&... args){
+        if(m_size == m_capacity) allocate(1);
+        new(&m_data[m_size]) T(std::forward<Args>(args)...);
+        m_size++;
+        return m_data[m_size-1];
+    }
     MyVector& operator=(const MyVector& other){
         Clear();
         if(m_capacity<other.m_size) allocate(blocks_in_size(other.m_size - m_capacity));
@@ -76,7 +98,7 @@ public:
     }
     MyVector& operator=(MyVector&& other){
         Clear();
-        allocate(-m_capacity);
+        allocate(-m_blocks_amount);
         m_data = other.m_data;
         m_size = other.m_size;
         m_capacity = other.m_capacity;
@@ -102,7 +124,6 @@ private:
     std::size_t m_capacity;
     void allocate(long long blocks){
         if(m_blocks_amount + blocks<=0){
-            for(size_t i = 0; i<m_size; i++) m_data[i].~T(); //????
             delete[] m_data;
             m_blocks_amount = 0;
             m_size = 0;

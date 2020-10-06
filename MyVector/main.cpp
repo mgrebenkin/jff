@@ -76,9 +76,11 @@ int main(int argc, const char * argv[]) {
     MyVector<Vector3> c(3);
     MyVector<Vector3> d;
     c.push_back(x1); c.push_back(x2);c.push_back(Vector3(5,5,5, "Fives"));
-    print_vector(c);
     d = c;
-    print_vector(d);
-    print_vector(c.append(d));
+    c.append(d);
+    c.EmplaceBack(6,6,6, "Sixes");
+    c.EmplaceBack();
+    print_vector(c);
+    
     return 0;
 }

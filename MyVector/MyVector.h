@@ -43,7 +43,7 @@ public:
     }
     ~MyVector(){
         Clear();
-        delete[] m_data;
+        ::operator delete(m_data, m_capacity*sizeof(T));
     }
     void Clear(){
         for (int i = 0; i< m_size; i++){
@@ -124,19 +124,22 @@ private:
     std::size_t m_capacity;
     void allocate(long long blocks){
         if(m_blocks_amount + blocks<=0){
-            delete[] m_data;
+            ::operator delete(m_data, m_capacity*sizeof(T));
             m_blocks_amount = 0;
             m_size = 0;
             m_capacity = 0;
             return;
         } else {
             m_blocks_amount +=blocks;
+            size_t prev_capacity = m_capacity;
             m_capacity = m_blocks_amount*_BLOCK_SIZE;
-            T* new_data = new T[m_capacity];
+            T* new_data = (T*)::operator new(m_capacity*sizeof(T));
             m_size = m_size<=m_capacity?m_size:m_capacity;
             for(size_t i = 0; i<m_size; i++)
                 new_data[i] = std::move(m_data[i]);
-            delete[] m_data;
+            if(m_data != nullptr){
+                ::operator delete(m_data, prev_capacity*sizeof(T));
+            }
             m_data = new_data;
             return;
         }

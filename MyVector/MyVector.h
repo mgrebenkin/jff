@@ -12,8 +12,82 @@
 #define _BLOCK_SIZE 5
 #define DBMSG(DBSTRING) (std::cout<<"|DBG: "<<(DBSTRING)<<"|\n")
 
+template<typename MyVector>
+class VectorIterator{
+public:
+    using ValueType = typename MyVector::ValueType;
+    using PointerType = ValueType*;
+    using ReferenceType = ValueType&;
+public:
+    VectorIterator():
+        m_ptr(nullptr){}
+    VectorIterator(PointerType ptr):
+        m_ptr(ptr){}
+    
+    VectorIterator& operator++(){
+        m_ptr++;
+        return *this;
+    }
+    VectorIterator operator++(int){
+        VectorIterator tmp_it = (*this);
+        m_ptr++;
+        return tmp_it;
+    }
+    VectorIterator& operator--(){
+        m_ptr--;
+        return *this;
+    }
+    VectorIterator operator--(int){
+        VectorIterator tmp_it = (*this);
+        m_ptr--;
+        return tmp_it;
+    }
+    VectorIterator& operator+=(int rhs){
+        m_ptr+=rhs;
+        return *this;
+    }
+    VectorIterator& operator-=(int rhs){
+        m_ptr-=rhs;
+        return *this;
+    }
+    ReferenceType operator[](int index){
+        return *(m_ptr + index);
+    }
+    PointerType operator->(){
+        return m_ptr;
+    }
+    ReferenceType operator*(){
+        return *m_ptr;
+    }
+    bool operator==(const VectorIterator& other){
+        return m_ptr == other.m_ptr;
+    }
+    bool operator!=(const VectorIterator& other){
+        return m_ptr != other.m_ptr;
+    }
+    size_t operator-(const VectorIterator& lhs){
+        return m_ptr - lhs.m_ptr;
+    }
+private:
+    PointerType m_ptr;
+};
+
+template<typename MyVector>
+VectorIterator<MyVector> operator+(VectorIterator<MyVector> lhs, int rhs){
+    return lhs+=rhs;
+}
+template<typename MyVector>
+VectorIterator<MyVector> operator-(VectorIterator<MyVector> lhs, int rhs){
+    return lhs-=rhs;
+}
+
+
+
 template<typename T>
 class MyVector{
+public:
+    using ValueType = T;
+    using Iterator = VectorIterator<MyVector<T>>;
 public:
     MyVector():
     m_data(nullptr),
@@ -117,6 +191,13 @@ public:
         this->m_size+=other.m_size;
         return *this;
     }
+    Iterator begin(){
+        return Iterator(m_data);
+    }
+    
+    Iterator end(){
+        return Iterator(m_data + m_size);
+    }
 private:
     T* m_data;
     std::size_t m_size;
@@ -143,9 +224,10 @@ private:
             m_data = new_data;
             return;
         }
-        
-        
     }
+    
+    
+    
     static size_t blocks_in_size(size_t size){
         return size/_BLOCK_SIZE + size%_BLOCK_SIZE?1:0;
     }

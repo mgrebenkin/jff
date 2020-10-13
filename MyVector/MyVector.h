@@ -75,7 +75,7 @@ public:
     }
     void push_back(T&& elem){
         if(m_size>=m_capacity) allocate(1);
-        m_data[m_size] = std::move(elem);
+        new(&m_data[m_size]) T(std::move(elem));
         m_size++;
         DBMSG("Move pushed");
     }
@@ -136,7 +136,7 @@ private:
             T* new_data = (T*)::operator new(m_capacity*sizeof(T));
             m_size = m_size<=m_capacity?m_size:m_capacity;
             for(size_t i = 0; i<m_size; i++)
-                new_data[i] = std::move(m_data[i]);
+                new(&new_data[i]) T(std::move(m_data[i]));
             if(m_data != nullptr){
                 ::operator delete(m_data, prev_capacity*sizeof(T));
             }

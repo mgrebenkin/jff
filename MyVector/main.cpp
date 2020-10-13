@@ -70,17 +70,41 @@ void print_vector(const MyVector<Vector3>& v){
 }
 
 int main(int argc, const char * argv[]) {
-    Vector3 x1(1,1,1, "Ones"), x2(2,2,2, "Twos"), x5(3,3,3, "Threes");
-    Vector3 x3(x1);
-    Vector3 x4(x2);
-    MyVector<Vector3> c(3);
-    MyVector<Vector3> d;
-    c.push_back(x1); c.push_back(x2);c.push_back(Vector3(5,5,5, "Fives"));
-    d = c;
-    c.append(d);
-    c.EmplaceBack(6,6,6, "Sixes");
-    c.EmplaceBack();
-    print_vector(c);
+    MyVector<int> vector;
+    vector.EmplaceBack(1);
+    vector.EmplaceBack(2);
+    vector.EmplaceBack(3);
+    vector.EmplaceBack(4);
+    vector.EmplaceBack(5);
+    
+    for(auto element:vector){
+        std::cout << element<<"   ";
+    }
+    std::cout << std::endl;
+    
+    for(MyVector<int>::Iterator it = vector.begin(); it != vector.end(); ++it){
+        std::cout << *it << "   ";
+    }
+    std::cout << std::endl;
+    MyVector<int>::Iterator it;
+    for(int i = 0; i < vector.get_size(); i++){
+        it = vector.begin();
+        it+=i;
+        std::cout << *it << "   ";
+    }
+    std::cout<<std::endl;
+    
+    for(int i = 0; i < vector.get_size(); i++){
+        std::cout << *(vector.begin()+i) << "   ";
+    }
+    std::cout << std::endl;
+    
+    MyVector<int>::Iterator it1 = vector.begin();
+    MyVector<int>::Iterator it2 = vector.end()-1;
+    std::cout << it2 - it1 << std::endl;
+    
+    
+    
     
     return 0;
 }
